@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Persistent Random Number Generator (1–68)</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 50px auto;
+      max-width: 500px;
+    }
+    #number {
+      font-size: 4em;
+      margin: 20px;
+      color: darkblue;
+    }
+    button {
+      font-size: 1.2em;
+      padding: 10px 20px;
+      margin: 10px;
+    }
+    #history {
+      margin-top: 30px;
+      text-align: left;
+    }
+    #history span {
+      display: inline-block;
+      margin: 4px;
+      padding: 6px 10px;
+      background-color: #f0f0f0;
+      border-radius: 5px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>Random Number Generator (1–68)</h1>
+  <div id="number">—</div>
+  <button onclick="generateNumber()">Generate</button>
+  <button onclick="resetGenerator()">Reset</button>
+
+  <div id="history">
+    <h3>Generated Numbers:</h3>
+    <div id="generatedList"></div>
+  </div>
+
+  <script>
+    let numbers = [];
+    let history = [];
+
+    function saveState() {
+      localStorage.setItem('remainingNumbers', JSON.stringify(numbers));
+      localStorage.setItem('historyNumbers', JSON.stringify(history));
+    }
+
+    function loadState() {
+      const saved = localStorage.getItem('remainingNumbers');
+      const savedHistory = localStorage.getItem('historyNumbers');
+      if (saved && savedHistory) {
+        numbers = JSON.parse(saved);
+        history = JSON.parse(savedHistory);
+      } else {
+        resetGenerator();
+        return;
+      }
+
+      // Update last number and list
+      if (history.length > 0) {
+        document.getElementById("number").textContent = history[history.length - 1];
+      }
+      updateHistoryDisplay();
+    }
+
+    function generateNumber() {
+      if (numbers.length === 0) {
+        alert("All numbers have been used! Please reset to start again.");
+        return;
+      }
+
+      const index = Math.floor(Math.random() * numbers.length);
+      const num = numbers.splice(index, 1)[0];
+      history.push(num);
+      document.getElementById("number").textContent = num;
+      updateHistoryDisplay();
+      saveState();
+    }
+
+    function updateHistoryDisplay() {
+      const container = document.getElementById("generatedList");
+      container.innerHTML = '';
+      history.forEach(n => {
+        const span = document.createElement("span");
+        span.textContent = n;
+        container.appendChild(span);
+      });
+    }
+
+    function resetGenerator() {
+      numbers = Array.from({ length: 68 }, (_, i) => i + 1);
+      history = [];
+      document.getElementById("number").textContent = '—';
+      updateHistoryDisplay();
+      saveState();
+    }
+
+    // Load saved state on startup
+    loadState();
+  </script>
+</body>
+</html>
